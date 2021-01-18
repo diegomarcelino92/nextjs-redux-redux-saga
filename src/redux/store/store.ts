@@ -1,25 +1,38 @@
-import { createStore, applyMiddleware } from 'redux'
+import { createStore, applyMiddleware, Store } from 'redux';
 
-import Immutable from 'seamless-immutable'
+import { MakeStore, createWrapper } from 'next-redux-wrapper';
 
-import { MakeStore, createWrapper, Context } from 'next-redux-wrapper'
+import createSagaMiddleware, { Task } from 'redux-saga';
 
-import rootReducer from '../reducers'
+import Immutable from 'seamless-immutable';
 
-export interface State {
-  app: string
+import rootReducer, { State } from '../reducers';
+import rootSagas from '../sagas';
+
+export interface SagaStore extends Store {
+  sagaTask: Task;
 }
 
 const composeMiddleware = (middleware: any) => {
   if (process.env.NODE_ENV !== 'production') {
-    const { composeWithDevTools } = require('redux-devtools-extension')
-    return composeWithDevTools(applyMiddleware(...middleware))
+    const { composeWithDevTools } = require('redux-devtools-extension');
+    return composeWithDevTools(applyMiddleware(...middleware));
   }
 
-  return applyMiddleware(...middleware)
-}
+  return applyMiddleware(...middleware);
+};
 
-const makeStore: MakeStore<State> = (context: Context) =>
-  createStore(Immutable(rootReducer), composeMiddleware([]))
+const makeStore: MakeStore<State> = () => {
+  const sagaMiddleware = createSagaMiddleware();
 
-export default createWrapper<State>(makeStore, { debug: true })
+  const store = createStore(
+    Immutable(rootReducer),
+    composeMiddleware([sagaMiddleware])
+  );
+
+  (store as SagaStore).sagaTask = sagaMiddleware.run(rootSagas);
+
+  return store;
+};
+
+export default createWrapper<State>(makeStore, { debug: true });
