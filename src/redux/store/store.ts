@@ -1,10 +1,10 @@
 import { createStore, applyMiddleware, Store } from 'redux';
 
 import { MakeStore, createWrapper } from 'next-redux-wrapper';
-
 import createSagaMiddleware, { Task } from 'redux-saga';
-
 import Immutable from 'seamless-immutable';
+
+import { composeWithDevTools } from 'redux-devtools-extension'
 
 import rootReducer, { State } from '../reducers';
 import rootSagas from '../sagas';
@@ -15,7 +15,6 @@ export interface SagaStore extends Store {
 
 const composeMiddleware = (middleware: any) => {
   if (process.env.NODE_ENV !== 'production') {
-    const { composeWithDevTools } = require('redux-devtools-extension');
     return composeWithDevTools(applyMiddleware(...middleware));
   }
 
