@@ -4,7 +4,7 @@ import { MakeStore, createWrapper } from 'next-redux-wrapper';
 import createSagaMiddleware, { Task } from 'redux-saga';
 import Immutable from 'seamless-immutable';
 
-import { composeWithDevTools } from 'redux-devtools-extension'
+import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly'
 
 import rootReducer, { State } from '../reducers';
 import rootSagas from '../sagas';
@@ -14,11 +14,7 @@ export interface SagaStore extends Store {
 }
 
 const composeMiddleware = (middleware: any) => {
-  if (process.env.NODE_ENV !== 'production') {
     return composeWithDevTools(applyMiddleware(...middleware));
-  }
-
-  return applyMiddleware(...middleware);
 };
 
 const makeStore: MakeStore<State> = () => {
